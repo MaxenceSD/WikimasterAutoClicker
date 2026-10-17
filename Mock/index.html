@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de clic</title>
+
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button img {
+            display: block;
+            width: 250px;
+            height: 250px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        #compteur {
+            margin-top: 25px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Ouvrir un paquet</h1>
+
+    <button id="ouvrir">
+        <img src="card_pack.webp" alt="Image du paquet">
+        Ouvrir
+    </button>
+
+    <div id="compteur">
+        Nombre de clics : 0
+    </div>
+
+    <script>
+        let clics = 0;
+
+        document.getElementById("ouvrir").addEventListener("click", function() {
+            clics++;
+
+            document.getElementById("compteur").textContent =
+                "Nombre de clics : " + clics;
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+
+{
+  "manifest_version": 3,
+  "name": "Clic automatique - Test",
+  "version": "1.0.0",
+  "description": "Clique sur le bouton de test à intervalles aléatoires.",
+  "permissions": ["activeTab"],
+  "action": {
+    "default_title": "Clic automatique",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "file:///*",
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "https://www.wiki-masters.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
