@@ -41,10 +41,10 @@ function trouverBoutonContinuer() {
     );
 }
 
-
 async function executerCycle(runId) {
-    // 1. Attendre 30 secondes après l'ouverture du paquet
-    console.log("Attente de 30 secondes...");
+    // 1. Attendre 20 secondes après l'ouverture du paquet
+    console.log("Attente de 15 secondes...");
+    afficherAction("  - Attente de 15 secondes...")
 
     if (!await attendre(15000, runId)) return;
 
@@ -64,6 +64,7 @@ async function executerCycle(runId) {
             return;
         }
 
+        afficherAction("  - Clic next")
         fleche.click();
         console.log(`Clic sur la flèche ${i + 1}/4`);
 
@@ -80,19 +81,22 @@ async function executerCycle(runId) {
 
     if (!continuer) {
         console.warn('Bouton "Continuer" introuvable.');
-        afficherAction('Bouton « Continuer » introuvable.');
         return;
     }
 
     if (continuer.disabled) {
         console.warn('Bouton "Continuer" désactivé.');
-        afficherAction('Bouton « Continuer » désactivé.');
         return;
     }
 
+    afficherAction("  - Click 'Continuer', fin du pack")
     continuer.click();
     console.log('Bouton "Continuer" cliqué.');
-    afficherAction('Bouton « Continuer » cliqué !');
+
+    const date = new Date();
+    date.setMinutes(date.getMinutes() + 10);
+
+    afficherAction("> Fin du cycle (prochain : " + date.toLocaleString("fr-FR") + ")")
 }
 
 async function boucleAutomatique(runId) {
@@ -111,6 +115,8 @@ async function boucleAutomatique(runId) {
             break;
         }
 
+        afficherAction("> Début du cycle")
+        afficherAction("  - Ouverture du pack")
         ouvrir.click();
         console.log('Bouton "Ouvrir" cliqué.');
 
@@ -138,44 +144,81 @@ async function boucleAutomatique(runId) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "start") {
         if (running) {
-            sendResponse({ message: "Automatisation déjà active." });
-            return;
+            sendResponse({
+                message: "Automatisation déjà active."
+            });
+            return true;
         }
 
         if (!trouverBoutonOuvrir()) {
             sendResponse({
                 message: 'Bouton "Ouvrir" introuvable sur cette page.'
             });
-            return;
+            return true;
         }
 
         running = true;
         currentRun++;
+
         const runId = currentRun;
 
-        // Démarre immédiatement, sans attendre le délai aléatoire
-        boucleAutomatique(runId);
+        Promise.all([
+            enregistrerEtat(true),
+            afficherAction("Automatisation démarrée.")
+        ]).then(() => {
+            boucleAutomatique(runId);
+        }).then(() => {
+            if (currentRun === runId && !running) {
+                return enregistrerEtat(false);
+            }
+        }).catch(console.error);
 
         sendResponse({
-            message: "Activé ! Premier clic immédiat."
+            message: "Automatisation activée !"
         });
+
+        return true;
     }
 
     if (message.action === "stop") {
         running = false;
         currentRun++;
 
-        // Annuler les attentes en cours
         for (const timer of timers) {
             clearTimeout(timer);
         }
 
         timers.clear();
 
+        Promise.all([
+            enregistrerEtat(false),
+            afficherAction("Automatisation arrêtée.")
+        ]).catch(console.error);
+
         sendResponse({
             message: "Automatisation arrêtée."
         });
-    }
 
-    return true;
+        return true;
+    }
 });
+
+async function afficherAction(message) {
+    const data = await chrome.storage.local.get("autoClickLog");
+    const logs = data.autoClickLog || [];
+
+    logs.push({
+        time: new Date().toLocaleTimeString("fr-FR"),
+        message
+    });
+
+    await chrome.storage.local.set({
+        autoClickLog: logs.slice(-100)
+    });
+}
+
+async function enregistrerEtat(active) {
+    await chrome.storage.local.set({
+        autoClickRunning: active
+    });
+}

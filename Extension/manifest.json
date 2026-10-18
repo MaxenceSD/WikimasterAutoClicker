@@ -4,7 +4,17 @@
   "name": "Clic automatique - Test",
   "version": "1.0.0",
   "description": "Clique sur le bouton de test à intervalles aléatoires.",
-  "permissions": ["activeTab"],
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+  "icons": {
+    "16": "icons/logo.png",
+    "48": "icons/logo.png",
+    "128": "icons/logo.png"
+  },
   "action": {
     "default_title": "Clic automatique",
     "default_popup": "popup.html"
@@ -15,7 +25,8 @@
         "file:///*",
         "http://localhost/*",
         "http://127.0.0.1/*",
-        "https://www.wiki-masters.com/*"
+        "https://www.wiki-masters.com/*",
+        "https://wiki-masters.com/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"
