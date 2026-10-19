@@ -39,10 +39,10 @@ function trouverBoutonContinuer() {
 
 async function executerCycle(runId) {
     // 1. Attendre 20 secondes après l'ouverture du paquet
-    console.log("Attente de 15 secondes");
-    afficherAction("Attente de 15 secondes")
+    console.log("Attente de 10 secondes");
+    afficherAction("Attente de 10 secondes")
 
-    if (!await attendre(15000, runId)) return;
+    if (!await attendre(10000, runId)) return;
 
     // 2. Cliquer 4 fois sur la flèche, à 1 seconde d'intervalle
     for (let i = 0; i < 4; i++) {
@@ -85,57 +85,39 @@ async function executerCycle(runId) {
         return;
     }
 
-    afficherAction("Click 'Continuer'")
     continuer.click();
     console.log('Bouton "Continuer" cliqué.');
-
-    const date = new Date();
-    date.setMinutes(date.getMinutes() + 9.5);
-
-    afficherAction("Ouverture terminée (prochaine : " + date.toLocaleString("fr-FR") + ")")
+    afficherAction("Click 'Continuer'")
 }
 
 async function boucleAutomatique(runId) {
     while (running && currentRun === runId) {
 
-        // Clic immédiat sur "Ouvrir"
         const ouvrir = trouverBoutonOuvrir();
 
-        if (!ouvrir) {
-            console.warn('Bouton "Ouvrir" introuvable.');
-            afficherAction("Bouton 'Ouvrir' introuvable")
-            break;
+        // Si le bouton existe et est activé, lancer le cycle.
+        if (ouvrir && !ouvrir.disabled) {
+            const txt = "Bouton Ouvrir activé : lancement du cycle.";
+            console.log(txt);
+            afficherAction(txt)
+
+            ouvrir.click();
+            console.log('Bouton "Ouvrir" cliqué.');
+
+            await executerCycle(runId);
+            
+            afficherAction("Nouvelle vérification dans 1 minute")
+
+            if (!running || currentRun !== runId) return;
+
         } else {
-            afficherAction("Bouton 'Ouvrir' trouvé")
+            const txt = 'Bouton "Ouvrir" désactivé. Nouvelle vérification dans 1 minute.';
+            console.log(txt);
+            afficherAction(txt)
         }
 
-        if (ouvrir.disabled) {
-            console.warn('Bouton "Ouvrir" désactivé.');
-            break;
-        }
-
-        afficherAction("Ouverture du pack")
-        ouvrir.click();
-        console.log('Bouton "Ouvrir" cliqué.');
-
-        // Effectuer la séquence après l'ouverture
-        await executerCycle(runId);
-
-        if (!running || currentRun !== runId) return;
-
-        // Attendre un délai de 9min30 avant le prochain paquet
-        const delai = 9.5 * 60 * 1000;
-
-        console.log(
-            `Prochain paquet dans ${Math.floor(delai / 60000)} min ` +
-            `${Math.floor((delai % 60000) / 1000)} s.`
-        );
-
-        if (!await attendre(delai, runId)) return;
-    }
-
-    if (currentRun === runId) {
-        running = false;
+        // Attendre une minute avant le prochain contrôle.
+        if (!await attendre(60 * 1000, runId)) return;
     }
 }
 
