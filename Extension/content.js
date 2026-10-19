@@ -16,13 +16,9 @@ function attendre(ms, runId) {
 
 // Recherche le bouton principal "Ouvrir"
 function trouverBoutonOuvrir() {
-    return [...document.querySelectorAll("button")].find(bouton => {
-        const image = bouton.querySelector(
-            'img[alt="Ouvrir un paquet"]'
-        );
-
-        return image && bouton.innerText.trim().includes("Ouvrir");
-    });
+    return [...document.querySelectorAll("button")].find(bouton =>
+        bouton.innerText.trim().includes("Ouvrir")
+    );
 }
 
 // Recherche le bouton fléché fourni
@@ -43,8 +39,8 @@ function trouverBoutonContinuer() {
 
 async function executerCycle(runId) {
     // 1. Attendre 20 secondes après l'ouverture du paquet
-    console.log("Attente de 15 secondes...");
-    afficherAction("  - Attente de 15 secondes...")
+    console.log("Attente de 15 secondes");
+    afficherAction("Attente de 15 secondes")
 
     if (!await attendre(15000, runId)) return;
 
@@ -64,7 +60,7 @@ async function executerCycle(runId) {
             return;
         }
 
-        afficherAction("  - Clic next")
+        afficherAction("Next")
         fleche.click();
         console.log(`Clic sur la flèche ${i + 1}/4`);
 
@@ -89,14 +85,14 @@ async function executerCycle(runId) {
         return;
     }
 
-    afficherAction("  - Click 'Continuer', fin du pack")
+    afficherAction("Click 'Continuer'")
     continuer.click();
     console.log('Bouton "Continuer" cliqué.');
 
     const date = new Date();
-    date.setMinutes(date.getMinutes() + 10);
+    date.setMinutes(date.getMinutes() + 9.5);
 
-    afficherAction("> Fin du cycle (prochain : " + date.toLocaleString("fr-FR") + ")")
+    afficherAction("Ouverture terminée (prochaine : " + date.toLocaleString("fr-FR") + ")")
 }
 
 async function boucleAutomatique(runId) {
@@ -107,7 +103,10 @@ async function boucleAutomatique(runId) {
 
         if (!ouvrir) {
             console.warn('Bouton "Ouvrir" introuvable.');
+            afficherAction("Bouton 'Ouvrir' introuvable")
             break;
+        } else {
+            afficherAction("Bouton 'Ouvrir' trouvé")
         }
 
         if (ouvrir.disabled) {
@@ -115,8 +114,7 @@ async function boucleAutomatique(runId) {
             break;
         }
 
-        afficherAction("> Début du cycle")
-        afficherAction("  - Ouverture du pack")
+        afficherAction("Ouverture du pack")
         ouvrir.click();
         console.log('Bouton "Ouvrir" cliqué.');
 
@@ -125,8 +123,8 @@ async function boucleAutomatique(runId) {
 
         if (!running || currentRun !== runId) return;
 
-        // Attendre un délai aléatoire avant le prochain paquet
-        const delai = 10 * 60 * 1000 + 30 * 1000;
+        // Attendre un délai de 9min30 avant le prochain paquet
+        const delai = 9.5 * 60 * 1000;
 
         console.log(
             `Prochain paquet dans ${Math.floor(delai / 60000)} min ` +
