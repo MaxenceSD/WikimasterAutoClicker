@@ -14,6 +14,17 @@ function attendre(ms, runId) {
     });
 }
 
+async function wait(runId, delayMin, delayVar) {
+    delayMin = delayMin * 1000;
+    delayVar = delayVar * 1000;
+
+    const delay = (Math.random() * delayVar) + delayMin
+
+    afficherAction('Wait : ' + delay / 1000);
+
+    if (!await attendre(delay, runId)) return;
+}
+
 // Recherche le bouton principal "Ouvrir"
 function trouverBoutonOuvrir() {
     return [...document.querySelectorAll("button")].find(bouton =>
@@ -37,12 +48,12 @@ function trouverBoutonContinuer() {
     );
 }
 
-async function executerCycle(runId) {
-    // 1. Attendre 20 secondes après l'ouverture du paquet
-    console.log("Attente de 10 secondes");
-    afficherAction("Attente de 10 secondes")
+async function executerCycle(runId, delay) {
+    // 1. Attendre x secondes après l'ouverture du paquet
+    console.log("Attente vérification bot");
+    afficherAction("Attente vérification bot")
 
-    if (!await attendre(10000, runId)) return;
+    await wait(runId, 30, delay);
 
     // 2. Cliquer 4 fois sur la flèche, à 1 seconde d'intervalle
     for (let i = 0; i < 4; i++) {
@@ -64,15 +75,12 @@ async function executerCycle(runId) {
         fleche.click();
         console.log(`Clic sur la flèche ${i + 1}/4`);
 
-        if (i < 3) {
-            if (!await attendre(1000, runId)) return;
+        if (i < 4) {
+            await wait(runId, 1, 3);
         }
     }
 
-    // 3. Attendre une seconde après le quatrième clic
-    if (!await attendre(1000, runId)) return;
-
-    // 4. Trouver et cliquer sur "Terminer"
+    // 3. Trouver et cliquer sur "Terminer"
     const continuer = trouverBoutonContinuer();
 
     if (!continuer) {
@@ -104,20 +112,24 @@ async function boucleAutomatique(runId) {
             ouvrir.click();
             console.log('Bouton "Ouvrir" cliqué.');
 
-            await executerCycle(runId);
-            
-            afficherAction("Nouvelle vérification dans 1 minute")
+            await executerCycle(runId, 45);
 
             if (!running || currentRun !== runId) return;
 
         } else {
-            const txt = 'Bouton "Ouvrir" désactivé. Nouvelle vérification dans 1 minute.';
+            const txt = 'Bouton "Ouvrir" non trouvé.';
             console.log(txt);
             afficherAction(txt)
+
+            const fleche = trouverBoutonFleche();
+            if (fleche) {
+                await executerCycle(runId, 0);
+            }
         }
 
-        // Attendre une minute avant le prochain contrôle.
-        if (!await attendre(60 * 1000, runId)) return;
+        // Attendre avant le prochain contrôle.
+        afficherAction("Attente nouvelle vérification")
+        await wait(runId, 300, 45);
     }
 }
 
@@ -126,13 +138,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (running) {
             sendResponse({
                 message: "Automatisation déjà active."
-            });
-            return true;
-        }
-
-        if (!trouverBoutonOuvrir()) {
-            sendResponse({
-                message: 'Bouton "Ouvrir" introuvable sur cette page.'
             });
             return true;
         }
