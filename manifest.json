@@ -29,7 +29,10 @@
         "https://wiki-masters.com/*"
       ],
       "js": [
-        "opener/content.js"
+        "opener/content.js",
+        "finder/core.js",
+        "finder/panel.js",
+        "finder/finder.js"
       ],
       "run_at": "document_idle"
     }
