@@ -1,0 +1,5 @@
+/* Only extension-owned attributes affect listings. Toolbox classes are untouched. */
+[data-wmsf-hidden="true"]{display:none!important}
+[data-wmsf-state="deal"]>a.card-frame,a.card-frame[data-wmsf-state="deal"]{outline:2px solid #67dcb0;outline-offset:2px}
+[data-wmsf-state="pending"]>a.card-frame,a.card-frame[data-wmsf-state="pending"]{outline:1px dashed #a998dd;outline-offset:2px}
+wm-shiny-finder{display:block;width:100%;margin:16px 0;position:relative;z-index:1}
