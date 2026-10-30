@@ -46,3 +46,15 @@ h1 {
     color: #777e8c;
     font-style: italic;
 }
+
+.feature-link {
+    color: #d4af37;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.feature-link:hover {
+    color: #f5d76e;
+    text-decoration: underline;
+}

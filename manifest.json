@@ -32,7 +32,8 @@
         "opener/content.js",
         "finder/core.js",
         "finder/panel.js",
-        "finder/finder.js"
+        "finder/finder.js",
+        "buyer/content.js"
       ],
       "run_at": "document_idle"
     }

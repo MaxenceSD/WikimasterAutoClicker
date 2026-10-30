@@ -1,14 +1,3 @@
-
-// ==UserScript==
-// @name         Wiki Masters Automation
-// @namespace    wiki-masters
-// @version      2.0
-// @description  Automatisation des pulls avec détection de navigation SPA
-// @match        https://www.wiki-masters.com/*
-// @run-at       document-idle
-// @grant        none
-// ==/UserScript==
-
 (() => {
     "use strict";
 
