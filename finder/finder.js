@@ -306,6 +306,7 @@
   }
 
   function toggleFavorite(id) { if (favorites.has(id)) favorites.delete(id); else if (favorites.size < 1000) favorites.add(id); save(); render(); }
+
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target.closest('button,a,[role="tab"]') : null;
     if (!target || own(target)) return;
@@ -319,20 +320,28 @@
     } catch { }
     if (rootPath() && target.closest('main')) scheduleSync();
   }, true);
+
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { stopScan('Exploration arrêtée : onglet en arrière-plan.'); gridObserver.disconnect(); clearInterval(timeTimer); timeTimer = null; clearTimeout(batchTimer); batchTimer = null; }
     else { stopWork(); scheduleSync(); }
   });
+
   document.addEventListener('change', e => { if (!own(e.target) && rootPath()) { stopScan('Exploration arrêtée : tri ou filtre natif modifié.'); scheduleSync(); } }, true);
+
   window.addEventListener('popstate', () => { pendingNavigation = null; suspend('Exploration arrêtée : navigation.'); scheduleSync(); });
+
   if (window.navigation) window.navigation.addEventListener('currententrychange', () => { pendingNavigation = null; suspend('Exploration arrêtée : navigation.'); scheduleSync(); });
+
   window.addEventListener('pagehide', () => { stopScan(); stopWork(); pageObserver.disconnect(); tabsObserver.disconnect(); shellObserver.disconnect(); clearTimeout(syncTimer); syncTimer = null; disposed = true; });
+
   window.addEventListener('pageshow', () => { if (disposed) { disposed = false; enabled = false; main = null; tabbar = null; startObservers(); scheduleSync(); } });
+
   function startObservers() {
     shellObserver.observe(document.body, { childList: true });
     for (const el of document.querySelectorAll('main,[role="main"]')) for (let p = el.parentElement; p && p !== document.body; p = p.parentElement)shellObserver.observe(p, { childList: true });
     observeMain();
   }
+
   async function init() {
     try {
       const saved = await chrome.storage.local.get([KEY, WATCH_KEY]); prefs = C.settings(saved[KEY]);
@@ -343,5 +352,6 @@
     // Ignore legacy filters and scan-session keys. Activation is never persisted.
     startObservers(); sync();
   }
+
   if (document.body) init(); else document.addEventListener('DOMContentLoaded', init, { once: true });
 })();

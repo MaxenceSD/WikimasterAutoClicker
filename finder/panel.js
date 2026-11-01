@@ -27,7 +27,7 @@
     previewBox.innerHTML = '<summary id="previewTitle">Diagnostic local</summary><textarea id="previewData" readonly aria-label="Contenu à exporter" style="width:100%;height:160px;background:#0d1422;color:#dce7fa;border:1px solid #394762;border-radius:8px;padding:10px;margin:10px 0;font:11px monospace"></textarea><button id="previewDownload">Télécharger le fichier</button>';
     root.getElementById('body').appendChild(previewBox);
     const $ = id => root.getElementById(id), text = (id, value) => { if ($(id).textContent !== String(value)) $(id).textContent = String(value); };
-    let lastState = null, listSignature = '', custom = false;
+    let lastState = null, custom = false;
     for (const id of ['toggle', 'reset', 'start', 'stop']) $(id).addEventListener('click', () => actions[id]());
     $('fold').addEventListener('click', () => actions.change({ collapsed: !lastState?.prefs.collapsed }));
     $('rarity').addEventListener('change', () => actions.change({ rarity: $('rarity').value }));
@@ -53,8 +53,7 @@
       text('recognized', enabled ? `Prix reconnus : ${s.priced}/${s.total} · Durées : ${s.timed}/${s.total} · Cotes fiables : ${s.quotes}/${s.total} · Cotes inutilisables dans la sélection : ${s.unreliable}` : 'En veille : aucune annonce analysée, aucun lot chargé automatiquement.');
       text('status', state.scan ? `Exploration · ${state.scan.done}/${state.scan.max} lots ajoutés` : state.message); text('nativeWarning', state.nativeWarning);
       const invalid = (p.minPrice !== null && p.maxPrice !== null && p.minPrice > p.maxPrice) || (p.minMinutes !== null && p.maxMinutes !== null && p.minMinutes > p.maxMinutes);
-      text('error', invalid ? 'Le minimum dépasse le maximum : aucune annonce ne peut correspondre.' : ''); $('start').disabled = !!state.scan || invalid; $('stop').disabled = !state.scan; $('batches').disabled = !!state.scan; $('export').disabled = !state.results.length;
-      text('summary', `Résultats confirmés · ${s.matched}${s.matched > 100 ? ' (100 premiers affichés)' : ''}`);
+      text('error', invalid ? 'Le minimum dépasse le maximum : aucune annonce ne peut correspondre.' : ''); $('start').disabled = !!state.scan || invalid; $('stop').disabled = !state.scan; $('batches').disabled = !!state.scan;
     }
     function preview(title, data, download) { text('previewTitle', title); $('previewData').value = data; previewBox.hidden = false; previewBox.open = true; $('previewDownload').onclick = download; }
     return { host, render, preview };
