@@ -1,7 +1,6 @@
 (() => {
   'use strict';
-  const LOGO='<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="6" y="2" width="45" height="58" rx="11" fill="#101827" stroke="#e6b85f" stroke-width="3"/><path d="m28 10 4.2 9.6 10.4 1-7.9 6.9 2.2 10.3-8.9-5.3-9 5.3 2.3-10.3-7.9-6.9 10.4-1Z" fill="#f4cb7d"/><circle cx="43" cy="43" r="11" fill="#172236" stroke="#dbe8f6" stroke-width="4"/><path d="m51 51 9 9" stroke="#dbe8f6" stroke-width="5" stroke-linecap="round"/></svg>';
-  const CSS=`
+  const CSS = `
   :host{display:block;color-scheme:dark;font:13px/1.5 system-ui,Segoe UI,sans-serif;color:#edf2ff;text-align:left;--muted:#a4b3cb;--gold:#f4cb7d;--line:#2a354b}*{box-sizing:border-box}button,input,select{font:inherit}
   .panel{background:#101725;border:1px solid #354159;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px #0002}header{display:flex;gap:12px;align-items:center;padding:14px 18px;background:linear-gradient(110deg,#1b2437,#111927);border-bottom:1px solid var(--line)}svg{width:40px;height:40px;flex:none}.brand{flex:1}.brand strong{font-size:14px;letter-spacing:1.5px}.brand span{color:var(--gold)}.eyebrow{font-size:10px;letter-spacing:1px;color:var(--muted);margin-top:2px}.tag{font-size:10px;border:1px solid #504164;color:#c6b6ea;border-radius:20px;padding:3px 8px;white-space:nowrap}
   button{cursor:pointer;border:1px solid #394762;background:#202c41;color:#e4ebfa;border-radius:8px;padding:9px 12px;font-weight:650}button:hover:enabled{border-color:#a6b7d6;background:#2a3850}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:3px}.fold{padding:4px 10px;font-size:20px}.primary{background:var(--gold);color:#241c12;border-color:var(--gold)}.primary:hover:enabled{background:#ffe0a0}.active{background:#183c32;color:#9df2d0;border-color:#377e66}.stop{color:#ffc3ca;background:#3c2735}.quiet{background:transparent;font-size:11px;color:var(--muted)}
@@ -10,67 +9,55 @@
   details{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}summary{cursor:pointer;color:#c8d4e8;font-weight:600;font-size:12px}.results{max-height:280px;overflow:auto;margin-top:10px;display:grid;gap:5px}.row{display:flex;align-items:center;gap:8px;padding:7px 9px;background:#182338;border-radius:8px}.row a{flex:1;min-width:0;color:#e8eef9;text-decoration:none;font-size:12px}.row small{display:block;color:var(--muted);font-size:10px}.star{padding:4px 8px;color:var(--gold)}.footer{margin-top:12px;display:flex;justify-content:space-between;gap:12px}.note{color:#94a5c1;font-size:10px;max-width:720px}[hidden]{display:none!important}
   @media(max-width:850px){.filters{grid-template-columns:1fr 1fr}.group:first-child{grid-column:1/-1}.opportunities{align-items:flex-start;flex-direction:column;gap:10px}.spacer,.tag{display:none}}
   @media(max-width:480px){.filters{grid-template-columns:1fr}.group:first-child{grid-column:auto}.body,header{padding:12px}.brand strong{font-size:12px}.counts{gap:5px}.count{padding:5px 8px}.footer{flex-direction:column}}`;
+
   function create(actions) {
-    const host=document.createElement('wm-shiny-finder'),root=host.attachShadow({mode:'open'});
-    root.innerHTML=`<style>${CSS}</style><section class="panel" aria-label="WikiMasters Shiny Finder"><header>${LOGO}<div class="brand"><strong>SHINY <span>FINDER</span></strong><div class="eyebrow">MARCHÉ · FILTRES LOCAUX <span id="version"></span></div></div><span class="tag" id="activity">EN VEILLE</span><button class="fold" id="fold" aria-label="Réduire le panneau" aria-expanded="true">−</button></header><div class="body" id="body"><div class="filters">
-    <div class="group"><p class="legend">01 · Rareté</p><label for="rarity">Cartes à afficher</label><select id="rarity"><option value="all">Toutes les cartes</option><option value="C">Commune (C)</option><option value="PC">Peu commune (PC)</option><option value="R">Rare (R)</option><option value="SR">Super rare (SR)</option><option value="UR">Ultra rare (UR)</option><option value="L">Légendaire normale (L)</option><option value="shiny">✦ Shiny uniquement</option></select><p class="help">Les shiny sont exclues de « Légendaire normale ».</p></div>
+    const host = document.createElement('wm-shiny-finder'), root = host.attachShadow({ mode: 'open' });
+    
+    root.innerHTML = `<style>${CSS}</style><section class="panel" aria-label="WikiMasters Shiny Finder"><header><div class="brand"><strong>SHINY <span>FINDER</span></strong></div><span class="tag" id="activity">OFF</span><button class="fold" id="fold" aria-label="Réduire le panneau" aria-expanded="true">−</button></header><div class="body" id="body"><div class="filters">
+    <div class="group"><p class="legend">01 · Rareté</p><label for="rarity">Cartes à afficher</label><select id="rarity"><option value="all">Toutes les cartes</option><option value="C">Commune (C)</option><option value="PC">Peu commune (PC)</option><option value="R">Rare (R)</option><option value="SR">Super rare (SR)</option><option value="UR">Ultra rare (UR)</option><option value="L">Légendaire normale (L)</option><option value="shiny">✦ Shiny uniquement ✦</option></select><p class="help">Les shiny sont exclues de « Légendaire normale ».</p></div>
     <div class="group"><p class="legend">02 · Prix pour miser · WB</p><div class="range"><label>Minimum<input id="minPrice" aria-label="Prix minimum" type="number" min="0" max="100000000" step="1" placeholder="0"></label><label>Maximum<input id="maxPrice" aria-label="Prix maximum" type="number" min="0" max="100000000" step="1" placeholder="Sans limite"></label></div><div class="chips"><button data-price="500,2000">500–2 000</button><button data-price=",">Tous les prix</button></div></div>
     <div class="group"><p class="legend">03 · Temps restant · minutes</p><div class="range"><label>Minimum<input id="minMinutes" aria-label="Durée minimum" type="number" min="0" max="43200" step="0.1" placeholder="0"></label><label>Maximum<input id="maxMinutes" aria-label="Durée maximum" type="number" min="0" max="43200" step="0.1" placeholder="Sans limite"></label></div><div class="chips"><button data-time="0,5">0–5 min</button><button data-time="5,10">5–10 min</button><button data-time=",">Tout</button></div></div></div>
     <div class="opportunities"><label class="check"><input id="dealsOnly" type="checkbox">Afficher uniquement les annonces sous la cote Toolbox</label><div class="discount"><label for="discountPreset">Décote min.</label><select id="discountPreset"><option value="0">0 %</option><option value="10">10 %</option><option value="20">20 %</option><option value="30">30 %</option><option value="custom">Personnalisé</option></select><input id="discount" type="number" aria-label="Décote personnalisée en pourcentage" min="0" max="99" step="0.1" hidden></div></div>
     <p class="help">Cote en attente : cadre violet pointillé, carte conservée pour laisser Toolbox charger. Elle n’est pas comptée comme un résultat confirmé.</p><p class="error" id="error" role="alert"></p><p class="warning" id="nativeWarning"></p>
     <div class="counts"><span class="count"><b id="matched">—</b>résultats</span><span class="count"><b id="total">—</b>chargées</span><span class="count"><b id="pending">—</b>en attente</span><span class="count"><b id="deals">—</b>sous la cote</span></div><p class="help" id="recognized"></p>
     <div class="actions"><button class="primary" id="toggle">Activer les filtres</button><button class="quiet" id="reset">Réinitialiser</button><span class="spacer"></span><select id="batches" aria-label="Nombre de lots supplémentaires"><option value="2">2 lots en plus</option><option value="5">5 lots en plus</option><option value="10">10 lots en plus</option><option value="20">20 lots en plus</option></select><button id="start">Explorer</button><button id="stop" class="stop" disabled>Stop</button></div>
-    <p class="status" id="status" role="status"></p><p class="help">Exploration sur demande · 5 s minimum entre lots · 3 min maximum · arrêt en arrière-plan.</p>
-    <details id="resultDetails"><summary id="summary">Résultats confirmés · toutes raretés</summary><div id="results" class="results"></div><button id="export" class="quiet">Exporter les résultats CSV</button></details>
-    <div class="footer"><span class="note">Prix = mise de départ, ou mise actuelle + 1 WB pour surenchérir. La cote Toolbox est une référence historique : frais, hausse des enchères et liquidité peuvent annuler la décote. Aucun achat automatique.</span><button id="diagnostic" class="quiet">Diagnostic</button></div></div></section>`;
-    const previewBox=document.createElement('details');previewBox.hidden=true;previewBox.id='previewBox';
-    previewBox.innerHTML='<summary id="previewTitle">Diagnostic local</summary><textarea id="previewData" readonly aria-label="Contenu à exporter" style="width:100%;height:160px;background:#0d1422;color:#dce7fa;border:1px solid #394762;border-radius:8px;padding:10px;margin:10px 0;font:11px monospace"></textarea><button id="previewDownload">Télécharger le fichier</button>';
+    <p class="status" id="status" role="status"></p><p class="help">Exploration sur demande · 5 s minimum entre lots · 3 min maximum · arrêt en arrière-plan.</p>`;
+
+    const previewBox = document.createElement('details'); previewBox.hidden = true; previewBox.id = 'previewBox';
+    previewBox.innerHTML = '<summary id="previewTitle">Diagnostic local</summary><textarea id="previewData" readonly aria-label="Contenu à exporter" style="width:100%;height:160px;background:#0d1422;color:#dce7fa;border:1px solid #394762;border-radius:8px;padding:10px;margin:10px 0;font:11px monospace"></textarea><button id="previewDownload">Télécharger le fichier</button>';
     root.getElementById('body').appendChild(previewBox);
-    const $=id=>root.getElementById(id),text=(id,value)=>{if($(id).textContent!==String(value))$(id).textContent=String(value);};
-    let lastState=null,listSignature='',custom=false;
-    for(const id of ['toggle','reset','start','stop','export','diagnostic'])$(id).addEventListener('click',()=>actions[id]());
-    $('fold').addEventListener('click',()=>actions.change({collapsed:!lastState?.prefs.collapsed}));
-    $('rarity').addEventListener('change',()=>actions.change({rarity:$('rarity').value}));
-    $('dealsOnly').addEventListener('change',()=>actions.change({dealsOnly:$('dealsOnly').checked}));
-    $('batches').addEventListener('change',()=>actions.change({batches:Number($('batches').value)}));
-    for(const id of ['minPrice','maxPrice','minMinutes','maxMinutes','discount'])$(id).addEventListener('change',()=>{
-      if(!$(id).checkValidity()){text('error','Entre une valeur valide, positive et dans les limites du champ.');return;}
-      actions.change({[id]:$(id).value===''?null:Number($(id).value)});
+    const $ = id => root.getElementById(id), text = (id, value) => { if ($(id).textContent !== String(value)) $(id).textContent = String(value); };
+    let lastState = null, listSignature = '', custom = false;
+    for (const id of ['toggle', 'reset', 'start', 'stop']) $(id).addEventListener('click', () => actions[id]());
+    $('fold').addEventListener('click', () => actions.change({ collapsed: !lastState?.prefs.collapsed }));
+    $('rarity').addEventListener('change', () => actions.change({ rarity: $('rarity').value }));
+    $('dealsOnly').addEventListener('change', () => actions.change({ dealsOnly: $('dealsOnly').checked }));
+    $('batches').addEventListener('change', () => actions.change({ batches: Number($('batches').value) }));
+    for (const id of ['minPrice', 'maxPrice', 'minMinutes', 'maxMinutes', 'discount']) $(id).addEventListener('change', () => {
+      if (!$(id).checkValidity()) { text('error', 'Entre une valeur valide, positive et dans les limites du champ.'); return; }
+      actions.change({ [id]: $(id).value === '' ? null : Number($(id).value) });
     });
-    $('discountPreset').addEventListener('change',()=>{custom=$('discountPreset').value==='custom';$('discount').hidden=!custom;if(custom){$('discount').focus();return;}actions.change({discount:Number($('discountPreset').value)});});
-    for(const button of root.querySelectorAll('[data-price],[data-time]'))button.addEventListener('click',()=>{
-      const price=button.hasAttribute('data-price'),[min,max]=(price?button.dataset.price:button.dataset.time).split(',').map(x=>x===''?null:Number(x));
-      actions.change(price?{minPrice:min,maxPrice:max}:{minMinutes:min,maxMinutes:max});
+    $('discountPreset').addEventListener('change', () => { custom = $('discountPreset').value === 'custom'; $('discount').hidden = !custom; if (custom) { $('discount').focus(); return; } actions.change({ discount: Number($('discountPreset').value) }); });
+    for (const button of root.querySelectorAll('[data-price],[data-time]')) button.addEventListener('click', () => {
+      const price = button.hasAttribute('data-price'), [min, max] = (price ? button.dataset.price : button.dataset.time).split(',').map(x => x === '' ? null : Number(x));
+      actions.change(price ? { minPrice: min, maxPrice: max } : { minMinutes: min, maxMinutes: max });
     });
-    $('resultDetails').addEventListener('toggle',()=>{if(lastState)renderList(lastState);});
-    function renderList(state) {
-      if(!$('resultDetails').open)return;
-      const signature=JSON.stringify(state.results.map(c=>[c.id,c.title,c.price,c.result.discount,state.favorites.has(c.id)]));
-      if(signature===listSignature)return;listSignature=signature;
-      const frag=document.createDocumentFragment();
-      if(!state.results.length){const p=document.createElement('p');p.className='help';p.textContent='Aucun résultat confirmé. Les cotes en attente restent dans le marché.';frag.appendChild(p);}
-      for(const c of state.results) {
-        const row=document.createElement('div');row.className='row';const a=document.createElement('a');a.href=location.origin+c.id;a.target='_blank';a.rel='noopener noreferrer';a.textContent=(c.shiny?'✦ ':'')+c.title;
-        const meta=document.createElement('small');meta.textContent=`${c.rarity} · ${c.price===null?'inconnu':c.price.toLocaleString('fr-FR')} WB${c.result.discount!==null?' · décote '+c.result.discount.toFixed(1).replace('.',',')+' %':''}`;a.appendChild(meta);
-        const star=document.createElement('button');star.className='star';star.textContent=state.favorites.has(c.id)?'★':'☆';star.setAttribute('aria-label',(state.favorites.has(c.id)?'Retirer des favoris : ':'Ajouter aux favoris : ')+c.title);star.addEventListener('click',()=>actions.favorite(c.id));row.append(a,star);frag.appendChild(row);
-      }
-      $('results').replaceChildren(frag);
-    }
+
     function render(state) {
-      lastState=state;const {prefs:p,stats:s,enabled}=state;
-      $('body').hidden=p.collapsed;$('fold').setAttribute('aria-expanded',String(!p.collapsed));$('fold').setAttribute('aria-label',p.collapsed?'Développer le panneau':'Réduire le panneau');text('fold',p.collapsed?'+':'−');text('version','· '+state.version);text('activity',enabled?'FILTRES ACTIFS':'EN VEILLE');
-      for(const id of ['rarity','minPrice','maxPrice','minMinutes','maxMinutes','discount','batches'])if(root.activeElement!==$(id))$(id).value=p[id]??'';
-      $('dealsOnly').checked=p.dealsOnly;if(![0,10,20,30].includes(p.discount))custom=true;$('discountPreset').value=custom?'custom':String(p.discount);$('discount').hidden=!custom;
-      text('toggle',enabled?'Désactiver les filtres':'Activer les filtres');$('toggle').className=enabled?'active':'primary';$('toggle').setAttribute('aria-pressed',String(enabled));
-      for(const id of ['matched','total','pending','deals'])text(id,enabled?s[id]:'—');
-      text('recognized',enabled?`Prix reconnus : ${s.priced}/${s.total} · Durées : ${s.timed}/${s.total} · Cotes fiables : ${s.quotes}/${s.total} · Cotes inutilisables dans la sélection : ${s.unreliable}`:'En veille : aucune annonce analysée, aucun lot chargé automatiquement.');
-      text('status',state.scan?`Exploration · ${state.scan.done}/${state.scan.max} lots ajoutés`:state.message);text('nativeWarning',state.nativeWarning);
-      const invalid=(p.minPrice!==null && p.maxPrice!==null && p.minPrice>p.maxPrice)||(p.minMinutes!==null && p.maxMinutes!==null && p.minMinutes>p.maxMinutes);
-      text('error',invalid?'Le minimum dépasse le maximum : aucune annonce ne peut correspondre.':'');$('start').disabled=!!state.scan || invalid;$('stop').disabled=!state.scan;$('batches').disabled=!!state.scan;$('export').disabled=!state.results.length;
-      text('summary',`Résultats confirmés · ${s.matched}${s.matched>100?' (100 premiers affichés)':''}`);renderList(state);
+      lastState = state; const { prefs: p, stats: s, enabled } = state;
+      $('body').hidden = p.collapsed; $('fold').setAttribute('aria-expanded', String(!p.collapsed)); $('fold').setAttribute('aria-label', p.collapsed ? 'Développer le panneau' : 'Réduire le panneau'); text('fold', p.collapsed ? '+' : '−'); text('activity', enabled ? 'ON' : 'OFF');
+      for (const id of ['rarity', 'minPrice', 'maxPrice', 'minMinutes', 'maxMinutes', 'discount', 'batches']) if (root.activeElement !== $(id)) $(id).value = p[id] ?? '';
+      $('dealsOnly').checked = p.dealsOnly; if (![0, 10, 20, 30].includes(p.discount)) custom = true; $('discountPreset').value = custom ? 'custom' : String(p.discount); $('discount').hidden = !custom;
+      text('toggle', enabled ? 'Désactiver les filtres' : 'Activer les filtres'); $('toggle').className = enabled ? 'active' : 'primary'; $('toggle').setAttribute('aria-pressed', String(enabled));
+      for (const id of ['matched', 'total', 'pending', 'deals']) text(id, enabled ? s[id] : '—');
+      text('recognized', enabled ? `Prix reconnus : ${s.priced}/${s.total} · Durées : ${s.timed}/${s.total} · Cotes fiables : ${s.quotes}/${s.total} · Cotes inutilisables dans la sélection : ${s.unreliable}` : 'En veille : aucune annonce analysée, aucun lot chargé automatiquement.');
+      text('status', state.scan ? `Exploration · ${state.scan.done}/${state.scan.max} lots ajoutés` : state.message); text('nativeWarning', state.nativeWarning);
+      const invalid = (p.minPrice !== null && p.maxPrice !== null && p.minPrice > p.maxPrice) || (p.minMinutes !== null && p.maxMinutes !== null && p.minMinutes > p.maxMinutes);
+      text('error', invalid ? 'Le minimum dépasse le maximum : aucune annonce ne peut correspondre.' : ''); $('start').disabled = !!state.scan || invalid; $('stop').disabled = !state.scan; $('batches').disabled = !!state.scan; $('export').disabled = !state.results.length;
+      text('summary', `Résultats confirmés · ${s.matched}${s.matched > 100 ? ' (100 premiers affichés)' : ''}`);
     }
-    function preview(title,data,download){text('previewTitle',title);$('previewData').value=data;previewBox.hidden=false;previewBox.open=true;$('previewDownload').onclick=download;}
-    return {host,render,preview};
+    function preview(title, data, download) { text('previewTitle', title); $('previewData').value = data; previewBox.hidden = false; previewBox.open = true; $('previewDownload').onclick = download; }
+    return { host, render, preview };
   }
-  globalThis.WMFinderPanel={create};
+  globalThis.WMFinderPanel = { create };
 })();

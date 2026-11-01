@@ -5,7 +5,6 @@
   else root.WMFinderCore = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
-  const VERSION = '12.0.0';
   const RARITIES = ['C', 'PC', 'R', 'SR', 'UR', 'L'];
   const FRAME = '.glow-c,.glow-pc,.glow-r,.glow-sr,.glow-ur,.glow-l,.shiny-card,.glow-shiny';
   const LINK = 'a.card-frame[href]';
@@ -131,5 +130,5 @@
     const cell=value => '"'+String(value??'').replace(/^[=+@\-\t\r]/,"'$&").replace(/"/g,'""')+'"';
     return '\uFEFF'+rows.map(row=>row.map(cell).join(';')).join('\r\n');
   }
-  return {VERSION,RARITIES,FRAME,LINK,DEFAULTS,clean,norm,number,settings,money,seconds,fieldNodes,auctionPrice,quote,identity,read,inRange,evaluate,tabName,csv};
+  return {RARITIES,FRAME,LINK,DEFAULTS,clean,norm,number,settings,money,seconds,fieldNodes,auctionPrice,quote,identity,read,inRange,evaluate,tabName,csv};
 });

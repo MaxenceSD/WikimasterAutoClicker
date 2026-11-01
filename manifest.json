@@ -22,9 +22,6 @@
   "content_scripts": [
     {
       "matches": [
-        "file:///*",
-        "http://localhost/*",
-        "http://127.0.0.1/*",
         "https://www.wiki-masters.com/*",
         "https://wiki-masters.com/*"
       ],
@@ -34,6 +31,9 @@
         "finder/panel.js",
         "finder/finder.js",
         "buyer/content.js"
+      ],
+      "css": [
+        "finder/finder.css"
       ],
       "run_at": "document_idle"
     }
