@@ -93,17 +93,28 @@
             status.dataset.type = type;
         }
 
-        function updateSelectionUi() {
-            const selectedCount = countSelected();
-            sellButton.textContent = `Mettre en vente (${selectedCount})`;
-            sellButton.disabled = isBusy || selectedCount === 0;
+function updateSelectionUi() {
+    const selectedCount = countSelected();
 
-            for (const row of cardsList.querySelectorAll(".wkm-qm-card-row")) {
-                const checkbox = row.querySelector("input[type='checkbox']");
-                checkbox.disabled = isBusy || (!checkbox.checked && selectedCount >= 5);
-                row.classList.toggle("is-selected", checkbox.checked);
-            }
+    sellButton.textContent = `Mettre en vente (${selectedCount})`;
+    sellButton.disabled = isBusy || selectedCount === 0;
+
+    for (const row of cardsList.querySelectorAll(".wkm-qm-card-row")) {
+        const cardSettings = settings.cards[row.dataset.cardId];
+        const selected = Boolean(cardSettings?.selected);
+
+        row.classList.toggle("is-selected", selected);
+        row.setAttribute("aria-checked", String(selected));
+
+        const disabled = isBusy || (!selected && selectedCount >= 5);
+        row.setAttribute("aria-disabled", String(disabled));
+
+        const priceInput = row.querySelector(".wkm-qm-price-input");
+        if (priceInput) {
+            priceInput.disabled = isBusy;
         }
+    }
+}
 
         function close() {
             if (isBusy || isClosed) {
@@ -122,71 +133,97 @@
             }
         }
 
-        function createCardRow(card) {
-            const cardSettings = settings.cards[card.id] || {
-                selected: false,
-                baseAmount: ""
-            };
+function createCardRow(card) {
+    const cardSettings = settings.cards[card.id] || {
+        selected: false,
+        baseAmount: ""
+    };
 
-            settings.cards[card.id] = cardSettings;
+    settings.cards[card.id] = cardSettings;
 
-            const row = createElement("article", "wkm-qm-card-row");
-            row.dataset.cardId = card.id;
+    const row = createElement("article", "wkm-qm-card-row");
+    row.dataset.cardId = card.id;
+    row.setAttribute("role", "checkbox");
+    row.setAttribute("tabindex", "0");
+    row.setAttribute("aria-label", `Sélectionner ${card.title}`);
+    row.setAttribute("aria-checked", String(Boolean(cardSettings.selected)));
 
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.className = "wkm-qm-card-checkbox";
-            checkbox.checked = Boolean(cardSettings.selected);
-            checkbox.setAttribute("aria-label", `Sélectionner ${card.title}`);
+    // Indicateur visuel de sélection
+    const selectionMark = createElement("span", "wkm-qm-card-check", "✓");
 
-            const image = createElement("img", "wkm-qm-card-image");
-            image.alt = "";
-            image.loading = "lazy";
+    const image = createElement("img", "wkm-qm-card-image");
+    image.alt = "";
+    image.loading = "lazy";
 
-            if (card.imageUrl && /^https:\/\//i.test(card.imageUrl)) {
-                image.src = card.imageUrl;
-            } else {
-                image.classList.add("is-empty");
-            }
+    if (card.imageUrl && /^https:\/\//i.test(card.imageUrl)) {
+        image.src = card.imageUrl;
+    } else {
+        image.classList.add("is-empty");
+    }
 
-            const details = createElement("div", "wkm-qm-card-details");
-            const cardTitle = createElement("div", "wkm-qm-card-title", card.title);
-            const cardMeta = createElement("div", "wkm-qm-card-meta", "Légendaire");
-            details.append(cardTitle, cardMeta);
+    const details = createElement("div", "wkm-qm-card-details");
+    const cardTitle = createElement("div", "wkm-qm-card-title", card.title);
+    const cardMeta = createElement("div", "wkm-qm-card-meta", "Légendaire");
 
-            const priceGroup = createElement("label", "wkm-qm-price-group");
-            const priceLabel = createElement("span", "wkm-qm-price-label", "Prix");
-            const priceInput = document.createElement("input");
-            priceInput.type = "number";
-            priceInput.min = "1";
-            priceInput.step = "1";
-            priceInput.inputMode = "numeric";
-            priceInput.placeholder = "Montant";
-            priceInput.className = "wkm-qm-price-input";
-            priceInput.value = cardSettings.baseAmount;
-            priceInput.disabled = isBusy;
-            priceInput.setAttribute("aria-label", `Prix de ${card.title}`);
-            priceGroup.append(priceLabel, priceInput);
+    details.append(cardTitle, cardMeta);
 
-            checkbox.addEventListener("change", () => {
-                if (checkbox.checked && countSelected() > 5) {
-                    checkbox.checked = false;
-                    setStatus("Tu peux sélectionner 5 cartes maximum.", "warning");
-                }
+    const priceGroup = createElement("label", "wkm-qm-price-group");
 
-                cardSettings.selected = checkbox.checked;
-                persist();
-                updateSelectionUi();
-            });
+    const priceInput = document.createElement("input");
+    priceInput.type = "number";
+    priceInput.min = "1";
+    priceInput.step = "1";
+    priceInput.inputMode = "numeric";
+    priceInput.placeholder = "Montant";
+    priceInput.className = "wkm-qm-price-input";
+    priceInput.value = cardSettings.baseAmount;
+    priceInput.disabled = isBusy;
+    priceInput.setAttribute("aria-label", `Prix de ${card.title}`);
 
-            priceInput.addEventListener("input", () => {
-                cardSettings.baseAmount = priceInput.value;
-                persist();
-            });
+    priceGroup.append(priceInput);
 
-            row.append(checkbox, image, details, priceGroup);
-            return row;
+    function toggleSelection() {
+        if (isBusy) return;
+
+        if (completedCardIds.has(card.id)) return;
+
+        if (!cardSettings.selected && countSelected() >= 5) {
+            setStatus("Tu peux sélectionner 5 cartes maximum.", "warning");
+            return;
         }
+
+        cardSettings.selected = !cardSettings.selected;
+
+        persist();
+        updateSelectionUi();
+    }
+
+    // Clic sur toute la carte, sauf sur le champ de prix
+    row.addEventListener("click", event => {
+        if (event.target.closest(".wkm-qm-price-group")) return;
+
+        toggleSelection();
+    });
+
+    // Navigation au clavier
+    row.addEventListener("keydown", event => {
+        if (event.target !== row) return;
+
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            toggleSelection();
+        }
+    });
+
+    priceInput.addEventListener("input", () => {
+        cardSettings.baseAmount = priceInput.value;
+        persist();
+    });
+
+    row.append(selectionMark, image, details, priceGroup);
+
+    return row;
+}
 
         for (const duration of DURATIONS) {
             const label = createElement("label", "wkm-qm-duration-option");
