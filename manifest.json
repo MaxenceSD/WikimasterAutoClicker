@@ -1,4 +1,3 @@
-
 {
   "manifest_version": 3,
   "name": "WkMstr Helper",
@@ -30,10 +29,15 @@
         "finder/core.js",
         "finder/panel.js",
         "finder/finder.js",
-        "buyer/content.js"
+        "buyer/content.js",
+        "quick-market/storage.js",
+        "quick-market/api.js",
+        "quick-market/modal.js",
+        "quick-market/content.js"
       ],
       "css": [
-        "finder/finder.css"
+        "finder/finder.css",
+        "quick-market/styles.css"
       ],
       "run_at": "document_idle"
     }
