@@ -20,11 +20,8 @@
     }
 
     function findCollectionHeading() {
-        const headings = document.querySelectorAll("h1, h2, h3");
-
-        return [...headings].find(heading =>
-            heading.textContent.trim().toLocaleLowerCase("fr") === "collection"
-        ) || null;
+        return [...document.querySelectorAll('h1.text-2xl.md\\:text-3xl.font-bold')]
+            .find(h1 => h1.textContent.trim() === "Collection") || null;
     }
 
     function createOpenButton(title) {
@@ -42,49 +39,31 @@
             event.preventDefault();
             event.stopPropagation();
 
-            if (button.classList.contains("is-loading")) return;
-
-            button.classList.add("is-loading");
             button.disabled = true;
 
             try {
                 await openQuickMarket();
             } finally {
-                button.classList.remove("is-loading");
                 button.disabled = false;
             }
         });
 
         container.appendChild(button);
 
-        // Crée une nouvelle div sous le conteneur du titre
-        const parent = title.parentElement;
+        // Nouvelle div sous le conteneur du titre
+        title.parentElement.insertAdjacentElement("afterend", container);
 
-        const buttonRow = document.createElement("div");
-        buttonRow.id = "wkm-qm-button-container";
-        buttonRow.className = "wkm-qm-button-container";
-
-        buttonRow.appendChild(button);
-
-        // Insère la nouvelle div après le conteneur du h1
-        parent.insertAdjacentElement("afterend", buttonRow);
-
-        return buttonRow;
+        return button;
     }
 
     function ensureButton() {
-        if (!isCollectionPage()) {
-            document.getElementById("wkm-qm-button-container")?.remove();
-            currentButton = null;
-            return;
-        }
+        if (!isCollectionPage()) return;
 
         const heading = findCollectionHeading();
+
         if (!heading) return;
 
-        if (currentButton?.isConnected) return;
-
-        document.getElementById("wkm-qm-button-container")?.remove();
+        if (document.getElementById(BUTTON_ID)) return;
 
         currentButton = createOpenButton(heading);
     }

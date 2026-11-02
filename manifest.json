@@ -24,6 +24,11 @@
         "https://www.wiki-masters.com/*",
         "https://wiki-masters.com/*"
       ],
+      "css": [
+        "finder/finder.css",
+        "quick-market/content.css",
+        "quick-market/modal.css"
+      ],
       "js": [
         "opener/content.js",
         "finder/core.js",
@@ -34,10 +39,6 @@
         "quick-market/api.js",
         "quick-market/modal.js",
         "quick-market/content.js"
-      ],
-      "css": [
-        "finder/finder.css",
-        "quick-market/styles.css"
       ],
       "run_at": "document_idle"
     }
