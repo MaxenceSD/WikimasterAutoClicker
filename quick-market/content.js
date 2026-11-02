@@ -27,7 +27,7 @@
         ) || null;
     }
 
-    function createOpenButton() {
+    function createOpenButton(title) {
         const container = document.createElement("div");
         container.id = "wkm-qm-button-container";
         container.className = "wkm-qm-button-container";
@@ -36,30 +36,57 @@
         button.id = BUTTON_ID;
         button.type = "button";
         button.className = "wkm-qm-open-button";
-        button.innerHTML = "<span>Marché rapide</span>";
-        button.addEventListener("click", openQuickMarket);
+        button.textContent = "Marché rapide";
+
+        button.addEventListener("click", async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (button.classList.contains("is-loading")) return;
+
+            button.classList.add("is-loading");
+            button.disabled = true;
+
+            try {
+                await openQuickMarket();
+            } finally {
+                button.classList.remove("is-loading");
+                button.disabled = false;
+            }
+        });
 
         container.appendChild(button);
 
-        return container;
+        // Crée une nouvelle div sous le conteneur du titre
+        const parent = title.parentElement;
+
+        const buttonRow = document.createElement("div");
+        buttonRow.id = "wkm-qm-button-container";
+        buttonRow.className = "wkm-qm-button-container";
+
+        buttonRow.appendChild(button);
+
+        // Insère la nouvelle div après le conteneur du h1
+        parent.insertAdjacentElement("afterend", buttonRow);
+
+        return buttonRow;
     }
 
     function ensureButton() {
         if (!isCollectionPage()) {
-            document.getElementById(BUTTON_ID)?.remove();
+            document.getElementById("wkm-qm-button-container")?.remove();
             currentButton = null;
             return;
         }
 
         const heading = findCollectionHeading();
-
         if (!heading) return;
 
         if (currentButton?.isConnected) return;
 
-        document.getElementById(BUTTON_ID)?.remove();
-        currentButton = createOpenButton();
-        heading.appendChild(currentButton);
+        document.getElementById("wkm-qm-button-container")?.remove();
+
+        currentButton = createOpenButton(heading);
     }
 
     async function openQuickMarket() {
