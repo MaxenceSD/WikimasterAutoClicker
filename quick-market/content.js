@@ -28,13 +28,20 @@
     }
 
     function createOpenButton() {
+        const container = document.createElement("div");
+        container.id = "wkm-qm-button-container";
+        container.className = "wkm-qm-button-container";
+
         const button = document.createElement("button");
         button.id = BUTTON_ID;
         button.type = "button";
         button.className = "wkm-qm-open-button";
-        button.innerHTML = '<span>Marché rapide</span>';
+        button.innerHTML = "<span>Marché rapide</span>";
         button.addEventListener("click", openQuickMarket);
-        return button;
+
+        container.appendChild(button);
+
+        return container;
     }
 
     function ensureButton() {
