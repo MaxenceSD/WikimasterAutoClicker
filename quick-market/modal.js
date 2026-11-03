@@ -24,7 +24,7 @@
         return element;
     }
 
-    function open({ cards, settings, onSave, onSell }) {
+    function open({ cards, settings, onSave, onSell, onClose }) {
         const overlay = createElement("div", "wkm-qm-overlay");
         const dialog = createElement("section", "wkm-qm-dialog");
         const header = createElement("header", "wkm-qm-header");
@@ -93,30 +93,30 @@
             status.dataset.type = type;
         }
 
-function updateSelectionUi() {
-    const selectedCount = countSelected();
+        function updateSelectionUi() {
+            const selectedCount = countSelected();
 
-    sellButton.textContent = `Mettre en vente (${selectedCount})`;
-    sellButton.disabled = isBusy || selectedCount === 0;
+            sellButton.textContent = `Mettre en vente (${selectedCount})`;
+            sellButton.disabled = isBusy || selectedCount === 0;
 
-    for (const row of cardsList.querySelectorAll(".wkm-qm-card-row")) {
-        const cardSettings = settings.cards[row.dataset.cardId];
-        const selected = Boolean(cardSettings?.selected);
+            for (const row of cardsList.querySelectorAll(".wkm-qm-card-row")) {
+                const cardSettings = settings.cards[row.dataset.cardId];
+                const selected = Boolean(cardSettings?.selected);
 
-        row.classList.toggle("is-selected", selected);
-        row.setAttribute("aria-checked", String(selected));
+                row.classList.toggle("is-selected", selected);
+                row.setAttribute("aria-checked", String(selected));
 
-        const disabled = isBusy || (!selected && selectedCount >= 5);
-        row.setAttribute("aria-disabled", String(disabled));
+                const disabled = isBusy || (!selected && selectedCount >= 5);
+                row.setAttribute("aria-disabled", String(disabled));
 
-        const priceInput = row.querySelector(".wkm-qm-price-input");
-        if (priceInput) {
-            priceInput.disabled = isBusy;
+                const priceInput = row.querySelector(".wkm-qm-price-input");
+                if (priceInput) {
+                    priceInput.disabled = isBusy;
+                }
+            }
         }
-    }
-}
 
-        function close() {
+        function close(notify = true) {
             if (isBusy || isClosed) {
                 return;
             }
@@ -125,6 +125,10 @@ function updateSelectionUi() {
             document.removeEventListener("keydown", onKeyDown);
             overlay.remove();
             document.documentElement.classList.remove("wkm-qm-no-scroll");
+
+            if (notify && typeof onClose === "function") {
+                onClose();
+            }
         }
 
         function onKeyDown(event) {
@@ -133,97 +137,97 @@ function updateSelectionUi() {
             }
         }
 
-function createCardRow(card) {
-    const cardSettings = settings.cards[card.id] || {
-        selected: false,
-        baseAmount: ""
-    };
+        function createCardRow(card) {
+            const cardSettings = settings.cards[card.id] || {
+                selected: false,
+                baseAmount: ""
+            };
 
-    settings.cards[card.id] = cardSettings;
+            settings.cards[card.id] = cardSettings;
 
-    const row = createElement("article", "wkm-qm-card-row");
-    row.dataset.cardId = card.id;
-    row.setAttribute("role", "checkbox");
-    row.setAttribute("tabindex", "0");
-    row.setAttribute("aria-label", `Sélectionner ${card.title}`);
-    row.setAttribute("aria-checked", String(Boolean(cardSettings.selected)));
+            const row = createElement("article", "wkm-qm-card-row");
+            row.dataset.cardId = card.id;
+            row.setAttribute("role", "checkbox");
+            row.setAttribute("tabindex", "0");
+            row.setAttribute("aria-label", `Sélectionner ${card.title}`);
+            row.setAttribute("aria-checked", String(Boolean(cardSettings.selected)));
 
-    // Indicateur visuel de sélection
-    const selectionMark = createElement("span", "wkm-qm-card-check", "✓");
+            // Indicateur visuel de sélection
+            const selectionMark = createElement("span", "wkm-qm-card-check", "✓");
 
-    const image = createElement("img", "wkm-qm-card-image");
-    image.alt = "";
-    image.loading = "lazy";
+            const image = createElement("img", "wkm-qm-card-image");
+            image.alt = "";
+            image.loading = "lazy";
 
-    if (card.imageUrl && /^https:\/\//i.test(card.imageUrl)) {
-        image.src = card.imageUrl;
-    } else {
-        image.classList.add("is-empty");
-    }
+            if (card.imageUrl && /^https:\/\//i.test(card.imageUrl)) {
+                image.src = card.imageUrl;
+            } else {
+                image.classList.add("is-empty");
+            }
 
-    const details = createElement("div", "wkm-qm-card-details");
-    const cardTitle = createElement("div", "wkm-qm-card-title", card.title);
-    const cardMeta = createElement("div", "wkm-qm-card-meta", "Légendaire");
+            const details = createElement("div", "wkm-qm-card-details");
+            const cardTitle = createElement("div", "wkm-qm-card-title", card.title);
+            const cardMeta = createElement("div", "wkm-qm-card-meta", "Légendaire");
 
-    details.append(cardTitle, cardMeta);
+            details.append(cardTitle, cardMeta);
 
-    const priceGroup = createElement("label", "wkm-qm-price-group");
+            const priceGroup = createElement("label", "wkm-qm-price-group");
 
-    const priceInput = document.createElement("input");
-    priceInput.type = "number";
-    priceInput.min = "1";
-    priceInput.step = "1";
-    priceInput.inputMode = "numeric";
-    priceInput.placeholder = "Montant";
-    priceInput.className = "wkm-qm-price-input";
-    priceInput.value = cardSettings.baseAmount;
-    priceInput.disabled = isBusy;
-    priceInput.setAttribute("aria-label", `Prix de ${card.title}`);
+            const priceInput = document.createElement("input");
+            priceInput.type = "number";
+            priceInput.min = "1";
+            priceInput.step = "1";
+            priceInput.inputMode = "numeric";
+            priceInput.placeholder = "Montant";
+            priceInput.className = "wkm-qm-price-input";
+            priceInput.value = cardSettings.baseAmount;
+            priceInput.disabled = isBusy;
+            priceInput.setAttribute("aria-label", `Prix de ${card.title}`);
 
-    priceGroup.append(priceInput);
+            priceGroup.append(priceInput);
 
-    function toggleSelection() {
-        if (isBusy) return;
+            function toggleSelection() {
+                if (isBusy) return;
 
-        if (completedCardIds.has(card.id)) return;
+                if (completedCardIds.has(card.id)) return;
 
-        if (!cardSettings.selected && countSelected() >= 5) {
-            setStatus("Tu peux sélectionner 5 cartes maximum.", "warning");
-            return;
+                if (!cardSettings.selected && countSelected() >= 5) {
+                    setStatus("Tu peux sélectionner 5 cartes maximum.", "warning");
+                    return;
+                }
+
+                cardSettings.selected = !cardSettings.selected;
+
+                persist();
+                updateSelectionUi();
+            }
+
+            // Clic sur toute la carte, sauf sur le champ de prix
+            row.addEventListener("click", event => {
+                if (event.target.closest(".wkm-qm-price-group")) return;
+
+                toggleSelection();
+            });
+
+            // Navigation au clavier
+            row.addEventListener("keydown", event => {
+                if (event.target !== row) return;
+
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    toggleSelection();
+                }
+            });
+
+            priceInput.addEventListener("input", () => {
+                cardSettings.baseAmount = priceInput.value;
+                persist();
+            });
+
+            row.append(selectionMark, image, details, priceGroup);
+
+            return row;
         }
-
-        cardSettings.selected = !cardSettings.selected;
-
-        persist();
-        updateSelectionUi();
-    }
-
-    // Clic sur toute la carte, sauf sur le champ de prix
-    row.addEventListener("click", event => {
-        if (event.target.closest(".wkm-qm-price-group")) return;
-
-        toggleSelection();
-    });
-
-    // Navigation au clavier
-    row.addEventListener("keydown", event => {
-        if (event.target !== row) return;
-
-        if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            toggleSelection();
-        }
-    });
-
-    priceInput.addEventListener("input", () => {
-        cardSettings.baseAmount = priceInput.value;
-        persist();
-    });
-
-    row.append(selectionMark, image, details, priceGroup);
-
-    return row;
-}
 
         for (const duration of DURATIONS) {
             const label = createElement("label", "wkm-qm-duration-option");
@@ -327,7 +331,7 @@ function createCardRow(card) {
                 row?.remove();
                 updateSelectionUi();
             },
-            close
+            close: () => close(false)
         };
 
         document.body.appendChild(overlay);

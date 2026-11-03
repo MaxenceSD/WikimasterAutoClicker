@@ -19,8 +19,18 @@
         }
 
         if (!response.ok) {
-            const message = data.message || data.error || `Erreur HTTP ${response.status}`;
-            throw new Error(message);
+            const message =
+                data.message ||
+                data.error ||
+                `Erreur HTTP ${response.status}`;
+
+            const error = new Error(message);
+
+            error.status = response.status;
+            error.code = data.code || null;
+            error.data = data;
+
+            throw error;
         }
 
         return data;

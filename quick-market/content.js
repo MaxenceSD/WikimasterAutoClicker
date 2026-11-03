@@ -13,6 +13,7 @@
     let currentButton = null;
     let currentModal = null;
     let isOpening = false;
+    let hasSuccessfulSale = false;
 
     function isCollectionPage() {
         return location.origin === "https://www.wiki-masters.com" &&
@@ -87,11 +88,17 @@
             // Ne montrer que les cartes légendaires actuellement présentes dans la collection.
             // Les réglages des cartes absentes restent stockés : une carte rendue après une
             // enchère sans acheteur retrouvera ainsi son prix et sa sélection.
+            hasSuccessfulSale = false;
             currentModal = window.WKMQuickMarketModal.open({
                 cards,
                 settings,
                 onSave: updatedSettings => window.WKMQuickMarketStorage.save(updatedSettings),
-                onSell: sellSelectedCards
+                onSell: sellSelectedCards,
+                onClose: () => {
+                    if (hasSuccessfulSale) {
+                        location.reload();
+                    }
+                },
             });
         } catch (error) {
             console.error("[WKM Quick Market] Impossible d'ouvrir la fenêtre :", error);
@@ -124,6 +131,7 @@
             const skippedCount = selectedCards.length - cardsToSell.length;
             let successCount = 0;
             let failureCount = 0;
+            let verificationRequired = false;
 
             if (skippedCount > 0) {
                 modalControls.setStatus(
@@ -133,6 +141,26 @@
             }
 
             for (let index = 0; index < cardsToSell.length; index += 1) {
+
+                // Attente aléatoire entre 3 et 8 secondes entre les ventes.
+                if (index > 0) {
+                    const delayMs = 3000 + Math.floor(Math.random() * 5001);
+                    let remainingMs = delayMs;
+
+                    while (remainingMs > 0) {
+                        modalControls.setStatus(
+                            `Prochaine mise en vente dans ${Math.ceil(remainingMs / 1000)} seconde(s)…`,
+                            "info"
+                        );
+
+                        const stepMs = Math.min(1000, remainingMs);
+
+                        await new Promise(resolve => setTimeout(resolve, stepMs));
+
+                        remainingMs -= stepMs;
+                    }
+                }
+
                 const card = cardsToSell[index];
 
                 modalControls.setStatus(
@@ -148,43 +176,74 @@
                     });
 
                     successCount += 1;
+                    hasSuccessfulSale = true;
                     modalControls.markSuccess(card.id);
                     console.info(
                         `[WKM Quick Market] Vente créée pour ${card.title}. Auction ID :`,
                         result.auction_id || "non fourni"
                     );
                 } catch (error) {
+
+                    if (error.code === "human_verification_required") {
+                        verificationRequired = true;
+
+                        modalControls.setStatus(
+                            "Vérification humaine requise par Wiki Masters. " +
+                            "Les ventes suivantes ont été interrompues. " +
+                            "Effectue la vérification officielle sur le site, " +
+                            "puis relance les ventes.",
+                            "warning"
+                        );
+
+                        console.warn(
+                            "[WKM Quick Market] Vérification anti-bot requise.",
+                            error
+                        );
+
+                        break;
+                    }
+
                     failureCount += 1;
+
                     modalControls.setStatus(
                         `Échec pour ${card.title} : ${error.message}. Les autres cartes seront conservées.`,
                         "error"
                     );
-                    console.error(`[WKM Quick Market] Échec de vente pour ${card.title} :`, error);
+
+                    console.error(
+                        `[WKM Quick Market] Échec de vente pour ${card.title} :`,
+                        error
+                    );
                 }
             }
 
-            if (successCount > 0 && failureCount === 0) {
-                modalControls.setStatus(
-                    `${successCount} vente(s) créée(s). Les cartes ont été retirées de cette liste.`,
-                    "success"
-                );
-            } else if (successCount > 0) {
-                modalControls.setStatus(
-                    `${successCount} vente(s) créée(s), ${failureCount} échec(s). Les cartes en échec restent sélectionnées.`,
-                    "warning"
-                );
-            } else if (failureCount > 0) {
-                modalControls.setStatus(
-                    `Aucune vente créée. Tes sélections et tes prix ont été conservés.`,
-                    "error"
-                );
-            }
+            if (!verificationRequired) {
 
-            if (skippedCount > 0 && successCount > 0) {
-                modalControls.setStatus(
-                    `${successCount} vente(s) créée(s). ${skippedCount} carte(s) restent sélectionnées pour plus tard.`,
-                    "success"
-                );
+                if (successCount > 0 && failureCount === 0) {
+                    modalControls.setStatus(
+                        `${successCount} vente(s) créée(s). Les cartes ont été retirées de cette liste.`,
+                        "success"
+                    );
+
+                } else if (successCount > 0) {
+                    modalControls.setStatus(
+                        `${successCount} vente(s) créée(s), ${failureCount} échec(s). Les cartes en échec restent sélectionnées.`,
+                        "warning"
+                    );
+
+                } else if (failureCount > 0) {
+                    modalControls.setStatus(
+                        "Aucune vente créée. Tes sélections et tes prix ont été conservés.",
+                        "error"
+                    );
+                }
+
+                if (skippedCount > 0 && successCount > 0) {
+                    modalControls.setStatus(
+                        `${successCount} vente(s) créée(s). ${skippedCount} carte(s) restent sélectionnées pour plus tard.`,
+                        "success"
+                    );
+                }
             }
         } catch (error) {
             modalControls.setStatus(`Impossible de lancer les ventes : ${error.message}`, "error");
