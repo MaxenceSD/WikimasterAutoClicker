@@ -27,7 +27,8 @@
       "css": [
         "finder/finder.css",
         "quick-market/content.css",
-        "quick-market/modal.css"
+        "quick-market/modal.css",
+        "quick-auction/style.css"
       ],
       "js": [
         "opener/content.js",
@@ -38,7 +39,9 @@
         "quick-market/storage.js",
         "quick-market/api.js",
         "quick-market/modal.js",
-        "quick-market/content.js"
+        "quick-market/content.js",
+        "quick-auction/api.js",
+        "quick-auction/content.js"
       ],
       "run_at": "document_idle"
     }

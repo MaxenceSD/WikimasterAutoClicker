@@ -1,0 +1,152 @@
+/* Conteneur principal Quick Auction */
+.wkm-qa-panel {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 6px 0;
+    padding: 5px 7px;
+
+    border: 1px solid rgba(74, 222, 128, 0.45);
+    border-radius: 8px;
+    background: rgba(20, 83, 45, 0.34);
+    color: #dcfce7;
+}
+
+/* Ligne des contrôles */
+.wkm-qa-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+}
+
+/* Boutons avec icônes */
+.wkm-qa-icon-button {
+    display: inline-flex;
+    flex: 0 0 28px;
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+    padding: 0;
+
+    border: 1px solid rgba(134, 239, 172, 0.55);
+    border-radius: 7px;
+    background: #166534;
+    color: #f0fdf4;
+
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.wkm-qa-icon-button:hover:not(:disabled) {
+    background: #15803d;
+}
+
+.wkm-qa-icon-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* Champ de mise */
+.wkm-qa-amount {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+
+    height: 28px;
+    padding: 0 6px;
+
+    border: 1px solid rgba(134, 239, 172, 0.5);
+    border-radius: 7px;
+    outline: none;
+
+    background: rgba(3, 25, 13, 0.72);
+    color: #f0fdf4;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.wkm-qa-amount:focus {
+    border-color: #86efac;
+    box-shadow: 0 0 0 2px rgba(134, 239, 172, 0.16);
+}
+
+/* Messages uniquement lorsqu'il y a quelque chose à signaler */
+.wkm-qa-status {
+    min-height: 0;
+    margin: 4px 1px 0;
+    color: #bbf7d0;
+    font-size: 10px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.wkm-qa-status:empty {
+    display: none;
+}
+
+.wkm-qa-status[data-state="warning"] {
+    color: #fde68a;
+}
+
+.wkm-qa-status[data-state="error"] {
+    color: #fecaca;
+}
+
+.wkm-qa-status[data-state="success"] {
+    color: #bbf7d0;
+}
+
+/* Animation du bouton actualiser */
+.wkm-qa-refresh.is-loading {
+    animation: wkm-qa-spin 800ms linear infinite;
+}
+
+@keyframes wkm-qa-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Adaptation mobile */
+@media (max-width: 420px) {
+    .wkm-qa-panel {
+        padding: 4px 5px;
+    }
+
+    .wkm-qa-controls {
+        gap: 4px;
+    }
+
+    .wkm-qa-icon-button {
+        flex-basis: 26px;
+        width: 26px;
+        height: 26px;
+        font-size: 15px;
+    }
+
+    .wkm-qa-amount {
+        height: 26px;
+        font-size: 11px;
+    }
+}
+
+/* Masquer les flèches +1 / -1 du champ numérique */
+
+/* Chrome, Edge, Safari */
+.wkm-qa-amount::-webkit-inner-spin-button,
+.wkm-qa-amount::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+.wkm-qa-amount {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
